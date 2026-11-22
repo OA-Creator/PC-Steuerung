@@ -1,0 +1,18 @@
+ATOMKRAFTWERK – FERNANSICHT ÜBER FIREBASE (vorbereitet 20.11.2026)
+
+Am PC läuft der Leitstand wie immer unter http://localhost:8090 – auch ganz ohne Firebase.
+Firebase ist nur die Fernansicht (Handy, PC aus, unterwegs).
+
+Einmal einrichten (Schritt für Schritt mit Claude):
+ 1. console.firebase.google.com -> neues Projekt "atomkraftwerk"
+ 2. Firestore-Datenbank anlegen (Region europe-west3 Frankfurt)
+ 3. Authentication -> Google als Anmeldeart einschalten
+ 4. Web-App hinzufügen -> Konfiguration in public\firebase-config.js eintragen
+ 5. Projekt-ID in .firebaserc eintragen, Google-Adresse in firestore.rules eintragen
+ 6. Projekteinstellungen -> Dienstkonten -> "Neuen privaten Schlüssel generieren"
+    -> Datei als I:\Atomkraftwerk\Programm\firebase-zugang.json speichern (GEHEIM, nicht weitergeben)
+ 7. "Firebase hochladen.bat" starten
+ 8. Atomkraftwerk neu starten -> Log zeigt "Fernspiegel an"
+
+Was hochgeladen wird: Stand alle 15 Minuten, beim Ausschalten/Ruhezustand/Aufwachen,
+Auswertungen stündlich bzw. täglich (rund 150 Schreibvorgänge am Tag, frei sind 20.000).

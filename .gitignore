@@ -4,3 +4,10 @@ Programm/lib/*.dll
 Programm/daten/
 *.log
 beenden.flag
+
+# Geheimes – nie hochladen
+Handy-App/schluessel/
+Handy-App/bau/
+*.jks
+firebase-zugang.json
+Firebase/.firebase/

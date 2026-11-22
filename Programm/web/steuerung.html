@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="de">
+<head>
+<!-- Atomkraftwerk Leitstand · Seite: Steuerung · Stand 23.11.2026 00:10 (Einzelseiten wie Futsal-App; gemeinsam: leitstand.css, leitstand.js) -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B0E11">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@500;700&family=Exo:wght@600&display=swap" rel="stylesheet">
+<title>Atomkraftwerk · Steuerung</title>
+<script src="fern-start.js"></script>
+<link rel="stylesheet" href="leitstand.css">
+</head>
+<body data-seite="steuerung">
+<header class="kopf">
+  <a class="marke" href="index.html" data-tip="Zur Übersicht">
+    <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true" fill="none" stroke="var(--bernstein)" stroke-width="2"><circle cx="17" cy="17" r="4"/><path d="M17 3a14 14 0 0 1 12.1 7L21 14.8A4.6 4.6 0 0 0 17 12.4Z"/><path d="M5 24a14 14 0 0 1 0-14l8 4.6a4.6 4.6 0 0 0 0 4.8Z"/><path d="M29 24a14 14 0 0 1-24 0l8-4.6a4.6 4.6 0 0 0 8 0Z"/></svg>
+    <div><b>ATOMKRAFTWERK</b><small>LEITSTAND · OAPC</small></div>
+  </a>
+  <div class="rechts">
+    <span class="pille" id="pille" role="status" data-tip="Gesamtzustand aller Werte: grün = alles normal, gelb = Warnung, rot = Alarm"><i></i><span id="pilletext">verbinde …</span></span>
+    <span class="laufzeit" id="laufzeit" data-tip="Wie lange der PC heute läuft (gezählt, solange das Atomkraftwerk-Programm läuft)"></span>
+    <button class="knopf nurpc" id="handyknopf" type="button" data-tip="QR-Code anzeigen, um den Leitstand aufs Handy zu holen">Aufs Handy</button>
+    <button class="knopf" id="schloss" type="button" data-tip="Schutz gegen versehentliches Verstellen: zum Ändern 1 Sekunde gedrückt halten. Sperrt sich nach 60 Sekunden ohne Bedienung wieder">🔒 Gesperrt</button>
+    <button class="knopf" id="thema" type="button" data-tip="Zwischen hellem und dunklem Aussehen umschalten">Hell</button>
+  </div>
+</header>
+
+<div class="rahmen">
+  <nav class="seite" aria-label="Bereiche">
+    <div class="titel">ANLAGE</div>
+    <a href="index.html" data-seite="uebersicht">Übersicht</a>
+    <a href="kuehlung.html" data-seite="kuehlung">Kühlkreislauf</a>
+    <a href="cpu-gpu.html" data-seite="cpugpu">Prozessor &amp; Grafik</a>
+    <a href="board.html" data-seite="board">Board-Wächter</a>
+    <a href="strom.html" data-seite="strom">Strom &amp; Kosten</a>
+    <a href="auswertung.html" data-seite="auswertung">Auswertung</a>
+    <a href="zeitplan.html" data-seite="zeitplan">Zeitplan</a>
+    <a href="steuerung.html" data-seite="steuerung">Steuerung</a>
+    <div class="titel" style="padding-top:18px">AUSBAU</div>
+    <a href="#" class="spaeter" aria-disabled="true" data-tip="Balkonkraftwerk: erzeugter Strom – kommt 2027">Erzeugung <span>2027</span></a>
+    <a href="#" class="spaeter" aria-disabled="true" data-tip="Balkonkraftwerk: Batteriespeicher – kommt 2027">Speicher <span>2027</span></a>
+  </nav>
+
+  <main>
+        <div class="stand" id="stand">PC aus – Stand von <b id="standzeit">—</b> Uhr <a id="pcstart" class="startknopf" href="http://fritz.box/#/network" target="_blank" rel="noopener" data-tip="Öffnet die FRITZ!Box. Dort beim PC auf „Computer starten“ tippen">PC starten</a></div>
+    <div class="fehler" id="fehler">Keine Verbindung zum Atomkraftwerk. Läuft das Programm?</div>
+    <div class="seitenkopf"><a class="zurueck" href="index.html">← Übersicht</a><span class="seitenpille">Steuerung</span></div>
+    <section class="panel s12" id="steuerung">
+      <h2>STEUERUNG <span>Handy-Alarm und PC</span></h2>
+      <details class="aufklapp steuer" id="hsteuer">
+      <summary>HANDY-ALARM UND PC AUSSCHALTEN</summary>
+      <div class="felder" style="grid-template-columns:repeat(auto-fit,minmax(230px,1fr))">
+        <label class="feld" data-tip="Adresse des ntfy-Servers. Normal: https://ntfy.sh"><small>NTFY-SERVER</small><input class="eingabe" id="hserver" autocomplete="off" spellcheck="false" placeholder="https://ntfy.sh"></label>
+        <label class="feld" data-tip="Android: das Thema, das du in der ntfy-App abonniert hast. Geheim halten – wer das Thema kennt, liest mit. Leer = kein ntfy"><small>NTFY-THEMA · ANDROID</small><input class="eingabe" id="hthema" autocomplete="off" spellcheck="false"></label>
+        <label class="feld" data-tip="iPhone: „User Key“ aus deinem Pushover-Konto. Leer = kein Pushover"><small>PUSHOVER USER KEY · IPHONE</small><input class="eingabe" id="hbenutzer" autocomplete="off" spellcheck="false"></label>
+        <label class="feld" data-tip="iPhone: „API Token“ deiner Pushover-Anwendung. Wird aus Sicherheitsgründen nicht angezeigt – leer lassen, dann bleibt der gespeicherte"><small>PUSHOVER API TOKEN</small><input class="eingabe" id="htoken" type="password" autocomplete="new-password" spellcheck="false"></label>
+      </div>
+      <div class="reihe">
+        <button class="knopf" type="button" id="hspeichern" data-tip="Einstellungen übernehmen und in atomkraftwerk.json speichern">Speichern</button>
+        <button class="knopf" type="button" id="htest" data-tip="Schickt eine Testmeldung an alle eingetragenen Handys">Test-Alarm senden</button>
+        <span class="hmeldung" id="hmeldung"></span>
+        <span style="flex:1"></span>
+        <button class="knopf rot" type="button" id="pcaus">PC ausschalten</button>
+      </div>
+      </details>
+    </section>
+    <div class="frage" id="pcfrage" role="dialog" aria-modal="true" aria-label="PC ausschalten">
+      <div class="kasten">
+        <b>PC AUSSCHALTEN?</b>
+        <p><b style="display:inline;font:inherit;color:var(--text);letter-spacing:0">Ruhezustand:</b> speichert alles und geht aus – kann vom Zeitplan wieder geweckt werden.<br><b style="display:inline;font:inherit;color:var(--text);letter-spacing:0">Herunterfahren:</b> ganz aus – nur noch per Knopf oder Handy-App starten.</p>
+        <p id="pcweck" style="display:none;color:var(--bernstein)"></p>
+        <div class="reihe"><button class="knopf" type="button" id="pcnein">Abbrechen</button><span style="flex:1"></span><button class="knopf" type="button" id="pcruhe">Ruhezustand</button><button class="knopf rot" type="button" id="pcja">Herunterfahren</button></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<nav class="unten" aria-label="Bereiche">
+  <a href="kuehlung.html" data-seite="kuehlung">Kühlung</a>
+  <a href="cpu-gpu.html" data-seite="cpugpu">CPU/GPU</a>
+  <a href="board.html" data-seite="board">Board</a>
+  <a href="strom.html" data-seite="strom">Strom</a>
+  <a href="auswertung.html" data-seite="auswertung">Analyse</a>
+  <a href="zeitplan.html" data-seite="zeitplan">Zeitplan</a>
+  <a href="steuerung.html" data-seite="steuerung">Steuern</a>
+</nav>
+
+<dialog id="uhr" aria-label="Uhrzeit wählen">
+  <div class="uhranzeige"><span id="uhrh" class="an">23</span>:<span id="uhrm">00</span></div>
+  <svg id="uhrblatt" width="280" height="280" viewBox="0 0 280 280"></svg>
+  <div class="reihe" style="justify-content:flex-end"><button class="knopf" type="button" id="uhrnein">Abbrechen</button><button class="knopf" type="button" id="uhrja" style="color:var(--bernstein);border-color:var(--bernstein)">OK</button></div>
+</dialog>
+<dialog id="qr" aria-labelledby="qrtitel">
+  <h2 id="qrtitel" style="margin:0;font-family:var(--schmal);letter-spacing:.12em;font-size:20px">LEITSTAND AUFS HANDY</h2>
+  <p class="hinweis" style="margin:10px 0 0">Mit der Handy-Kamera scannen – das Handy muss im WLAN zu Hause sein.</p>
+  <div id="qrbild"></div>
+  <div id="qradresse"></div>
+  <p class="hinweis" style="margin:14px 0 18px;font-size:13px">Danach im Browser-Menü „Zum Startbildschirm hinzufügen".</p>
+  <form method="dialog"><button class="knopf" style="width:100%">Schließen</button></form>
+</dialog>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="leitstand.js"></script>
+</body>
+</html>

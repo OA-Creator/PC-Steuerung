@@ -22,7 +22,7 @@ public class PumpenEinstellungen
     public double ZielTempBis { get; set; } = 35;      // ab dieser Wassertemperatur gilt ZielFlussMax (°C)
     public double MinProzent { get; set; } = 20;       // Automatik: nie weniger Ansteuerung als das
     public string Betrieb { get; set; } = "auto";      // "auto" = Regelung auf ZielFluss, "hand" = feste Ansteuerung HandProzent
-    public double HandProzent { get; set; } = 60;      // Hand: 25–100 %
+    public double HandProzent { get; set; } = 60;      // Hand: MinProzent–100 %
     public double AnlaufMin { get; set; } = 3;         // Startschub: so lange mindestens (1, 2, 3, 5 oder 10 Minuten)
     public double AnlaufProzent { get; set; } = 100;   // Startschub: mit dieser Stärke (80, 90 oder 100 %)
 }
@@ -69,7 +69,7 @@ public sealed class PumpenSteuerung
 
     private void Setzen(double p)
     {
-        var unten = Hand ? 25 : Math.Max(_e.Pumpe.MinProzent, _boden);
+        var unten = Hand ? _e.Pumpe.MinProzent : Math.Max(_e.Pumpe.MinProzent, _boden);
         Prozent = Math.Clamp(p, unten, 100);
         try { _ctl?.Control?.SetSoftware((float)Prozent); } catch (Exception ex) { Log.Schreiben("Pumpe: Setzen fehlgeschlagen: " + ex.Message); }
     }
@@ -83,7 +83,7 @@ public sealed class PumpenSteuerung
         var jetzt = DateTime.Now;
         var fluss = a.Wert("flow.durchfluss").Aktuell;
         var g = _e.Grenzen;
-        WasserJetzt = a.Wert("flow.wasser").Aktuell;
+        WasserJetzt = a.BehaelterWasser();
         ZielJetzt = ZielNachTemperatur(WasserJetzt);
         UngeregeltPruefen(jetzt, fluss);
 
@@ -113,7 +113,7 @@ public sealed class PumpenSteuerung
         {
             Modus = "Hand";
             Setzen(_e.Pumpe.HandProzent);
-            var wasser = a.Wert("flow.wasser").Aktuell;
+            var wasser = a.BehaelterWasser();
             var warm = g.FlussAlarmAbWasserC <= 0 || (wasser is double w && w >= g.FlussAlarmAbWasserC);
             if (fluss is double fh && fh < g.FlussAlarmLh && warm)
             {
@@ -225,7 +225,7 @@ public sealed class PumpenSteuerung
         }
         if (prozent != null && double.TryParse(prozent, NumberStyles.Float, CultureInfo.InvariantCulture, out var hp))
         {
-            hp = Math.Clamp(Math.Round(hp), 25, 100);
+            hp = Math.Clamp(Math.Round(hp), _e.Pumpe.MinProzent, 100);
             if (hp != _e.Pumpe.HandProzent)
             {
                 _e.Pumpe.HandProzent = hp;

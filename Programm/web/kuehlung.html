@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="de">
+<head>
+<!-- Atomkraftwerk Leitstand · Seite: Kühlkreislauf · Stand 23.11.2026 00:10 (Einzelseiten wie Futsal-App; gemeinsam: leitstand.css, leitstand.js) -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B0E11">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@500;700&family=Exo:wght@600&display=swap" rel="stylesheet">
+<title>Atomkraftwerk · Kühlkreislauf</title>
+<script src="fern-start.js"></script>
+<link rel="stylesheet" href="leitstand.css">
+</head>
+<body data-seite="kuehlung">
+<header class="kopf">
+  <a class="marke" href="index.html" data-tip="Zur Übersicht">
+    <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true" fill="none" stroke="var(--bernstein)" stroke-width="2"><circle cx="17" cy="17" r="4"/><path d="M17 3a14 14 0 0 1 12.1 7L21 14.8A4.6 4.6 0 0 0 17 12.4Z"/><path d="M5 24a14 14 0 0 1 0-14l8 4.6a4.6 4.6 0 0 0 0 4.8Z"/><path d="M29 24a14 14 0 0 1-24 0l8-4.6a4.6 4.6 0 0 0 8 0Z"/></svg>
+    <div><b>ATOMKRAFTWERK</b><small>LEITSTAND · OAPC</small></div>
+  </a>
+  <div class="rechts">
+    <span class="pille" id="pille" role="status" data-tip="Gesamtzustand aller Werte: grün = alles normal, gelb = Warnung, rot = Alarm"><i></i><span id="pilletext">verbinde …</span></span>
+    <span class="laufzeit" id="laufzeit" data-tip="Wie lange der PC heute läuft (gezählt, solange das Atomkraftwerk-Programm läuft)"></span>
+    <button class="knopf nurpc" id="handyknopf" type="button" data-tip="QR-Code anzeigen, um den Leitstand aufs Handy zu holen">Aufs Handy</button>
+    <button class="knopf" id="schloss" type="button" data-tip="Schutz gegen versehentliches Verstellen: zum Ändern 1 Sekunde gedrückt halten. Sperrt sich nach 60 Sekunden ohne Bedienung wieder">🔒 Gesperrt</button>
+    <button class="knopf" id="thema" type="button" data-tip="Zwischen hellem und dunklem Aussehen umschalten">Hell</button>
+  </div>
+</header>
+
+<div class="rahmen">
+  <nav class="seite" aria-label="Bereiche">
+    <div class="titel">ANLAGE</div>
+    <a href="index.html" data-seite="uebersicht">Übersicht</a>
+    <a href="kuehlung.html" data-seite="kuehlung">Kühlkreislauf</a>
+    <a href="cpu-gpu.html" data-seite="cpugpu">Prozessor &amp; Grafik</a>
+    <a href="board.html" data-seite="board">Board-Wächter</a>
+    <a href="strom.html" data-seite="strom">Strom &amp; Kosten</a>
+    <a href="auswertung.html" data-seite="auswertung">Auswertung</a>
+    <a href="zeitplan.html" data-seite="zeitplan">Zeitplan</a>
+    <a href="steuerung.html" data-seite="steuerung">Steuerung</a>
+    <div class="titel" style="padding-top:18px">AUSBAU</div>
+    <a href="#" class="spaeter" aria-disabled="true" data-tip="Balkonkraftwerk: erzeugter Strom – kommt 2027">Erzeugung <span>2027</span></a>
+    <a href="#" class="spaeter" aria-disabled="true" data-tip="Balkonkraftwerk: Batteriespeicher – kommt 2027">Speicher <span>2027</span></a>
+  </nav>
+
+  <main>
+        <div class="stand" id="stand">PC aus – Stand von <b id="standzeit">—</b> Uhr <a id="pcstart" class="startknopf" href="http://fritz.box/#/network" target="_blank" rel="noopener" data-tip="Öffnet die FRITZ!Box. Dort beim PC auf „Computer starten“ tippen">PC starten</a></div>
+    <div class="fehler" id="fehler">Keine Verbindung zum Atomkraftwerk. Läuft das Programm?</div>
+    <div class="seitenkopf"><a class="zurueck" href="index.html">← Übersicht</a><span class="seitenpille">Kühlkreislauf</span></div>
+    <section class="panel s7" id="kuehlung">
+      <h2><span style="font:inherit;letter-spacing:inherit;color:inherit">KÜHLMITTEL · <b id="wname" style="font-weight:600">BEHÄLTER</b></span><span id="icueinfo"></span></h2>
+      <div class="wkopf">
+        <div class="gross">
+          <span class="zahl wasserzahl" style="font-size:96px;color:var(--wasser)" id="wasser" data-tip="Kühlwassertemperatur im Behälter, live aus iCUE. Gelb ab 35 °C, rot ab 40 °C">—</span>
+          <span class="einh" style="font-size:30px">°C</span>
+        </div>
+        <div class="trend" data-tip="Trend der letzten Minute: ▲ rot = steigt, ▼ grün = fällt, ► = bleibt gleich"><span class="tpfeil steht" id="pfeil" aria-hidden="true">►</span><span id="trendtext">gleichbleibend</span></div>
+      </div>
+      <div class="waechter" id="wgrenztip" data-tip="Abstand der Wassertemperatur zur Warn- und Alarmgrenze">
+        <div class="leiste" id="wleiste"><div class="zone w"></div><div class="zone a"></div><div class="fuell"></div></div>
+        <div class="skala" id="wskala"></div>
+      </div>
+      <div class="felder" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr))">
+        <div class="feld" data-tip="Niedrigste Wassertemperatur seit Programmstart"><small>MIN</small><b id="wmin">—</b></div>
+        <div class="feld" data-tip="Höchste Wassertemperatur seit Programmstart"><small>MAX</small><b id="wmax">—</b></div>
+        <div class="feld" data-tip="Durchschnitt der Wassertemperatur seit Programmstart"><small>Ø SEIT START</small><b id="wavg">—</b></div>
+        <div class="feld" id="wdeltafeld" data-tip="Wasser im Behälter minus Einlass-Luft: je kleiner, desto besser arbeiten die Radiatoren"><small>ÜBER EINLASS</small><b id="wdelta">—</b></div>
+      </div>
+      <div class="wkurve" id="wkurve"><svg id="wsvg" preserveAspectRatio="none"></svg><div class="info" id="winfo"></div></div>
+      <div class="wleg"><span><i style="background:var(--wasser)"></i>Wasser im Behälter</span><span id="wlegluft"><i style="background:var(--bernstein)"></i>Einlassluft</span><span style="margin-left:auto">letzte 3 Stunden</span></div>
+    </section>
+    <section class="panel s5" id="durchfluss">
+      <h2>DURCHFLUSS <span>high flow NEXT</span></h2>
+      <div class="gross" id="flussbox" data-tip="Durchfluss des Kühlwassers in Liter pro Stunde, gemessen vom high flow NEXT"><span class="zahl" style="font-size:60px;color:var(--wasser)" id="fluss">—</span><span class="einh" style="font-size:22px">l/h</span><span class="pumpe" id="pumpe" data-tip="Drehzahl der Pumpe">Pumpe — rpm</span></div>
+      <div class="felder" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+        <div class="feld" data-tip="Niedrigster Durchfluss seit Programmstart"><small>MIN</small><b id="fmin">—</b></div>
+        <div class="feld" data-tip="Höchster Durchfluss seit Programmstart"><small>MAX</small><b id="fmax">—</b></div>
+        <div class="feld" data-tip="Durchschnittlicher Durchfluss seit Programmstart"><small>Ø SEIT START</small><b id="favg">—</b></div>
+      </div>
+      <div class="klein">
+        <span id="leitwert" data-tip="Leitfähigkeit des Kühlmittels. Steigt sie, wird das Wasser schlechter">— µS/cm</span>
+        <span id="qualitaet" data-tip="Wasserqualität laut high flow NEXT (aus der Leitfähigkeit berechnet)">— %</span>
+        <span id="flusswasser" data-tip="Wassertemperatur direkt am high flow NEXT">— °C</span>
+      </div>
+      <div class="klein" id="pzeile" style="display:none;align-items:center" data-tip="Pumpe am Board-Anschluss FAN4_PUMP. Startschub: mit der eingestellten Anlauf-Stärke und -Zeit, bis der high flow NEXT Durchfluss meldet. Automatik: hält den eingestellten Durchfluss. BIOS: das Board regelt selbst (Programm aus oder Steuerung abgeschaltet)">
+        <span id="pmodus">—</span>
+        <span id="phinweis" style="display:none;color:var(--warn);font-weight:600" data-tip="">⚠ ungeregelt</span>
+        <span id="pprozent">— %</span>
+      </div>
+      <details class="aufklapp steuer" id="psteuer" style="display:none">
+        <summary>PUMPE STEUERN</summary>
+        <div class="klein" style="align-items:center;padding-top:6px">
+          <select id="pbetrieb" aria-label="Pumpenbetrieb" style="min-height:36px;background:var(--feld);color:var(--text);border:1px solid var(--linie2);border-radius:8px;padding:0 8px;font:inherit;font-size:15px" data-tip="Automatik: Pumpe so langsam wie möglich, aber mit dem eingestellten Durchfluss (Standard 60 l/h). Hand: du stellst die Ansteuerung selbst ein (8–100 %)"><option value="auto">Automatik</option><option value="hand">Hand</option></select>
+          <label id="pautobox" style="display:flex;align-items:center;gap:8px;flex:1;min-width:220px">Ziel <input type="range" id="pziel" min="30" max="150" step="5" style="flex:1;accent-color:var(--bernstein)"> <b id="pzieltext">—</b></label>
+          <label id="phandbox" style="display:none;align-items:center;gap:8px;flex:1;min-width:220px">Pumpe <input type="range" id="phand" min="8" max="100" step="1" style="flex:1;accent-color:var(--bernstein)"> <b id="phandtext">—</b></label>
+          <label id="panlaufbox" style="display:flex;align-items:center;gap:8px" data-tip="Anlauf (Startschub) nach Programmstart oder wenn der Durchfluss wegbricht: so lange und so stark läuft die Pumpe mindestens, bevor geregelt wird. Ohne gemessenen Durchfluss bleibt sie im Anlauf">Anlauf
+            <select id="panlaufmin" aria-label="Anlaufzeit" style="min-height:36px;background:var(--feld);color:var(--text);border:1px solid var(--linie2);border-radius:8px;padding:0 8px;font:inherit;font-size:15px"><option value="1">1 min</option><option value="2">2 min</option><option value="3">3 min</option><option value="5">5 min</option><option value="10">10 min</option></select>
+            <select id="panlaufprozent" aria-label="Anlauf-Stärke" style="min-height:36px;background:var(--feld);color:var(--text);border:1px solid var(--linie2);border-radius:8px;padding:0 8px;font:inherit;font-size:15px"><option value="80">80 %</option><option value="90">90 %</option><option value="100">100 %</option></select>
+          </label>
+          <button type="button" id="pstandard" data-tip="Zurück auf Standard: Automatik, 60 l/h, Hand-Wert 60 %, Anlauf 3 min mit 100 %, gelernte Untergrenze gelöscht" style="min-height:36px;background:var(--feld);color:var(--text);border:1px solid var(--linie2);border-radius:8px;padding:0 12px;font:inherit;font-size:14px;cursor:pointer">Standard</button>
+        </div>
+      </details>
+      <button type="button" class="lkopf" id="lkopf" aria-expanded="false" aria-controls="luefter" data-tip="Antippen zum Auf- und Zuklappen"><span><span class="pfeil">▸</span> Lüfter <span id="lanz"></span></span><b id="lspanne">— rpm</b></button>
+      <div class="liste" id="luefter" data-tip="Lüfterdrehzahlen aus iCUE" hidden></div>
+    </section>
+
+  </main>
+</div>
+
+<nav class="unten" aria-label="Bereiche">
+  <a href="kuehlung.html" data-seite="kuehlung">Kühlung</a>
+  <a href="cpu-gpu.html" data-seite="cpugpu">CPU/GPU</a>
+  <a href="board.html" data-seite="board">Board</a>
+  <a href="strom.html" data-seite="strom">Strom</a>
+  <a href="auswertung.html" data-seite="auswertung">Analyse</a>
+  <a href="zeitplan.html" data-seite="zeitplan">Zeitplan</a>
+  <a href="steuerung.html" data-seite="steuerung">Steuern</a>
+</nav>
+
+<dialog id="uhr" aria-label="Uhrzeit wählen">
+  <div class="uhranzeige"><span id="uhrh" class="an">23</span>:<span id="uhrm">00</span></div>
+  <svg id="uhrblatt" width="280" height="280" viewBox="0 0 280 280"></svg>
+  <div class="reihe" style="justify-content:flex-end"><button class="knopf" type="button" id="uhrnein">Abbrechen</button><button class="knopf" type="button" id="uhrja" style="color:var(--bernstein);border-color:var(--bernstein)">OK</button></div>
+</dialog>
+<dialog id="qr" aria-labelledby="qrtitel">
+  <h2 id="qrtitel" style="margin:0;font-family:var(--schmal);letter-spacing:.12em;font-size:20px">LEITSTAND AUFS HANDY</h2>
+  <p class="hinweis" style="margin:10px 0 0">Mit der Handy-Kamera scannen – das Handy muss im WLAN zu Hause sein.</p>
+  <div id="qrbild"></div>
+  <div id="qradresse"></div>
+  <p class="hinweis" style="margin:14px 0 18px;font-size:13px">Danach im Browser-Menü „Zum Startbildschirm hinzufügen".</p>
+  <form method="dialog"><button class="knopf" style="width:100%">Schließen</button></form>
+</dialog>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="leitstand.js"></script>
+</body>
+</html>

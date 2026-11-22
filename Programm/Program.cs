@@ -39,6 +39,9 @@ anlage.Strom = fritz.Stand;
 _ = Task.Run(() => fritz.LaufenAsync(stopp.Token));
 Console.CancelKeyPress += (_, a) => { a.Cancel = true; stopp.Cancel(); };
 
+// Fernspiegel: Stand bei Firebase ablegen, damit der Leitstand auch bei ausgeschaltetem PC zu sehen ist (seit 20.11.2026)
+var fern = new Fernspiegel(ordner, anlage, e);
+
 // Windows fährt herunter / meldet ab: letzten Stand dezent aufs Handy, dann sauber beenden.
 // Sicher klappt das beim Herunterfahren über den Leitstand-Knopf; über das Startmenü nur, wenn Windows dem Programm noch Zeit lässt.
 var letzterStandGesendet = 0;
@@ -50,7 +53,7 @@ async Task LetztenStandSendenAsync(string grund)
         anlage.LaufzeitZaehlen();
         var text = anlage.LetzterStandText();
         Log.Schreiben($"Letzter Stand ({grund}): {text}");
-        await Handy.HinweisAsync(e.Handy, "PC aus " + DateTime.Now.ToString("HH:mm"), text);
+        await Task.WhenAll(Handy.HinweisAsync(e.Handy, "PC aus " + DateTime.Now.ToString("HH:mm"), text), fern.StandAsync(grund, false));
     }
     catch (Exception ex) { Log.Schreiben("Letzter Stand: " + ex.Message); }
 }
@@ -63,6 +66,10 @@ void BeimHerunterfahren(System.Runtime.InteropServices.PosixSignalContext k)
 using var sigTerm = System.Runtime.InteropServices.PosixSignalRegistration.Create(System.Runtime.InteropServices.PosixSignal.SIGTERM, BeimHerunterfahren);
 using var sigQuit = System.Runtime.InteropServices.PosixSignalRegistration.Create(System.Runtime.InteropServices.PosixSignal.SIGQUIT, BeimHerunterfahren); // Abmelden
 
+// Zeitplan: PC zu festen Zeiten in den Ruhezustand schicken und wieder wecken (seit 19.11.2026)
+var zeitplan = new Zeitplan(e, ordner, anlage.DatenOrdner);
+zeitplan.VorDemSchlafen = () => LetztenStandSendenAsync("Ruhezustand (Zeitplan)");
+
 Server? server = null;
 try
 {
@@ -70,11 +77,17 @@ try
     server.Auswertung = new Auswertung(anlage, fritz);
     server.Pumpe = pumpe;
     server.Einst = e;
-    server.VorDemHerunterfahren = () => LetztenStandSendenAsync("im Leitstand heruntergefahren");
+    server.VorDemHerunterfahren = grund => LetztenStandSendenAsync(grund);
+    server.Zeitplan = zeitplan;
+    server.Fritz = fritz;
     _ = server.LaufenAsync(stopp.Token);
     Log.Schreiben("Leitstand erreichbar: " + server.Adresse);
 }
 catch (Exception ex) { Log.Schreiben("Webserver startet nicht: " + ex.Message); }
+
+fern.Auswertung = server?.Auswertung ?? new Auswertung(anlage, fritz);
+fern.Pumpe = pumpe;
+fern.Zeitplan = zeitplan;
 
 var alarm = new AlarmMelder(e, ordner);
 
@@ -106,7 +119,14 @@ while (!stopp.IsCancellationRequested)
     var pause = DateTime.Now - letzterLauf;
     letzterLauf = DateTime.Now;
     if (pause.TotalSeconds > 30)
+    {
         HardwareNeuUebernehmen($"Aufgewacht nach {Math.Round(pause.TotalMinutes, 1)} min Pause (Ruhezustand)");
+        Interlocked.Exchange(ref letzterStandGesendet, 0);   // beim nächsten Aus wieder den letzten Stand schicken
+        WachHalten.Fuer(TimeSpan.FromMinutes(10));           // sonst legt Windows einen von selbst geweckten PC nach 2 min wieder schlafen
+        try { zeitplan.NachDemAufwachen(); } catch (Exception ex) { Log.Schreiben("Zeitplan nach dem Aufwachen: " + ex.Message); }
+        fern.NachDemAufwachen();
+        Zeitplan.WeckGrundLoggen();
+    }
     else if (pumpe.SteuerungWeg)
     {
         if (steuerungWegSeit == DateTime.MinValue) steuerungWegSeit = DateTime.Now;
@@ -128,6 +148,8 @@ while (!stopp.IsCancellationRequested)
         anlage.IcueDatei = icue.Datei; anlage.IcueStand = icue.Stand; anlage.IcueLaeuft = icue.Laeuft;
         anlage.Bewerten();
         alarm.Pruefen(anlage);
+        zeitplan.Pruefen();
+        fern.Pruefen();
         anlage.LaufzeitZaehlen();
         if (DateTime.Now.Minute != letzteMinute)
         {

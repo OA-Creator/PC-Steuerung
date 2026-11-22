@@ -1,0 +1,234 @@
+/* Atomkraftwerk Leitstand – gemeinsames Aussehen aller Seiten · Stand 23.11.2026 00:10 */
+:root{
+  --grund:#0B0E11; --kopf:#0F1317; --panel:#12171C; --feld:#0E1216; --linie:#222A31; --linie2:#2A333B;
+  --text:#E6EAEE; --text2:#C3CBD3; --leise:#B3BDC7; --stumm:#8F9AA6; --aus:#5A6670;
+  --bernstein:#F2A33A; --wasser:#5BC8E0; --ok:#4CC77A; --ok-grund:#12221A; --ok-rand:#2C5A3A; --ok-text:#9FE2B3;
+  --warn:#F2C46B; --warn-grund:#2A2112; --warn-rand:#5A4220; --alarm:#FF6B70; --alarm-grund:#2A1416; --alarm-rand:#6A2A2E;
+  --balken:#1F3A44; --aktiv:#1B2229; --gruen:#39D353; --rahmen:rgba(57,211,83,.28);
+  --mono:'JetBrains Mono',ui-monospace,Consolas,monospace; --schmal:'Barlow Condensed','Arial Narrow',sans-serif; --sans:Barlow,system-ui,'Segoe UI',sans-serif;
+}
+:root[data-theme="hell"]{
+  --grund:#EEF1F4; --kopf:#FFFFFF; --panel:#FFFFFF; --feld:#F2F4F7; --linie:#D9DEE4; --linie2:#C9D0D8;
+  --text:#14181C; --text2:#2E363E; --leise:#56616C; --stumm:#5F6A75; --aus:#8D97A1;
+  --bernstein:#B86A00; --wasser:#0B7F9A; --ok:#1E8B4C; --ok-grund:#E3F4EA; --ok-rand:#9ED3B3; --ok-text:#16683A;
+  --warn:#8A5A00; --warn-grund:#FFF2D9; --warn-rand:#E7C27A; --alarm:#C2262C; --alarm-grund:#FDE5E6; --alarm-rand:#EBA2A5;
+  --balken:#BFE3EC; --aktiv:#EEF1F4; --gruen:#1F9E3D; --rahmen:rgba(31,158,61,.35);
+}
+*{box-sizing:border-box}
+html{zoom:.7}
+@media (min-width:761px){html{zoom:.85}}   /* PC: war 0.7, Oli 22.11.: bei 100 % etwas klein; Handy bleibt 0.7 */
+html,body{margin:0;background:var(--grund);color:var(--text);font-family:var(--sans)}
+a{color:var(--bernstein)}
+button{font:inherit}
+.kopf{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 16px;padding:14px 24px;border-bottom:1px solid var(--linie);background:var(--kopf);position:sticky;top:0;z-index:5}
+.marke{display:flex;align-items:center;gap:12px}
+.marke b{display:block;font-family:var(--schmal);font-weight:700;font-size:24px;letter-spacing:.08em;line-height:1}
+.marke small{display:block;font-size:12px;color:var(--text2);letter-spacing:.14em;margin-top:7px}
+.rechts{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pille{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;font-size:14px;border:1px solid var(--ok-rand);background:var(--ok-grund);color:var(--ok-text)}
+.pille i{width:9px;height:9px;border-radius:50%;background:var(--ok)}
+.pille.warn{border-color:var(--warn-rand);background:var(--warn-grund);color:var(--warn)} .pille.warn i{background:var(--warn)}
+.pille.aus{border-color:var(--linie2);background:var(--feld);color:var(--leise)} .pille.aus i{background:var(--leise)}
+.startknopf{margin-left:12px;display:inline-block;padding:6px 14px;border-radius:8px;border:1px solid var(--bernstein);color:var(--bernstein);text-decoration:none;font-weight:600}
+.stand{grid-column:span 12;display:none;padding:10px 14px;border:1px solid var(--linie2);border-radius:10px;background:var(--feld);color:var(--leise);font-size:15px}
+.pille.alarm{border-color:var(--alarm-rand);background:var(--alarm-grund);color:var(--alarm)} .pille.alarm i{background:var(--alarm)}
+.laufzeit{font-family:var(--mono);font-size:14px;color:var(--leise)}
+.knopf{min-height:44px;padding:0 14px;background:var(--panel);color:var(--text);border:1px solid var(--linie2);border-radius:8px;cursor:pointer}
+.knopf:hover{border-color:var(--bernstein)}
+.rahmen{display:flex;flex-wrap:wrap;gap:24px;padding:24px;max-width:1800px;margin:0 auto}
+nav.seite{flex:1 1 200px;max-width:220px;display:flex;flex-direction:column;gap:4px}
+nav.seite .titel{font-family:var(--schmal);font-size:13px;letter-spacing:.16em;color:var(--stumm);padding:4px 12px 8px}
+nav.seite a{display:flex;align-items:center;justify-content:space-between;min-height:44px;padding:0 12px;border-radius:8px;color:var(--text2);text-decoration:none}
+nav.seite a:hover{background:var(--aktiv)}
+nav.seite a.an{background:var(--aktiv);color:var(--bernstein);font-weight:600;box-shadow:inset 3px 0 0 var(--bernstein)}
+nav.seite a.spaeter{color:var(--aus)}
+nav.seite a.spaeter span{font-size:12px;border:1px solid var(--linie2);border-radius:4px;padding:1px 6px}
+main{flex:999 1 640px;min-width:0;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px;align-content:start}
+.panel{background:var(--panel);border:1px solid var(--rahmen);box-shadow:inset 3px 0 0 var(--gruen);border-radius:12px;padding:16px 22px 22px;display:flex;flex-direction:column;gap:16px;scroll-margin-top:90px}
+.panel.warn{border-color:var(--warn-rand)} .panel.alarm{border-color:var(--alarm);box-shadow:0 0 0 1px var(--alarm) inset}
+.panel h2{margin:0;line-height:1;align-items:center;font-family:'Exo',var(--schmal);font-weight:600;font-size:18px;letter-spacing:.14em;color:var(--text);display:flex;justify-content:space-between;gap:8px}
+.panel h2 span{font-family:var(--sans);font-weight:400;letter-spacing:0;font-size:13px;color:var(--stumm)}
+.s7{grid-column:span 7}.s5{grid-column:span 5}.s4{grid-column:span 4}.s12{grid-column:span 12}
+.gross{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}
+.zahl{font-family:var(--mono);font-weight:700;line-height:.9;letter-spacing:-.03em}
+.einh{color:var(--leise)}
+.pfeil{font-size:40px;line-height:1;align-self:center}
+.pumpe{margin:0 auto;align-self:center;font-family:var(--mono);font-size:24px;font-weight:700;color:var(--bernstein)}
+.pfeil.steigt{color:var(--alarm)} .pfeil.faellt{color:var(--ok)} .pfeil.steht{color:var(--leise)}
+.felder{display:grid;gap:10px}
+.kostenreihe{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-top:10px}.kostenreihe .feld{flex:0 1 calc((100% - 50px) / 6);min-width:150px}
+.eingabe{display:block;width:100%;box-sizing:border-box;margin-top:6px;min-height:38px;padding:0 10px;background:var(--panel);color:var(--text);border:1px solid var(--linie2);border-radius:8px;font:15px var(--mono)}
+.eingabe:focus{outline:none;border-color:var(--bernstein)}
+.reihe{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px}
+.knopf.rot{color:var(--alarm);border-color:var(--alarm-rand);background:var(--alarm-grund)}
+.knopf.rot:hover{border-color:var(--alarm)}
+.hmeldung{color:var(--leise);font-size:14px}
+/* Fernansicht (Firebase): Bedienelemente, die nur am PC gehen, ausblenden */
+.fern #pcaus,.fern #zpueber,.fern #hspeichern,.fern #htest,.fern #handyknopf,.fern #pcstart,
+.fern #psteuer,.fern #szsteuer,.fern #pbetrieb,.fern #pautobox,.fern #phandbox,.fern #panlaufbox,.fern #pstandard,.fern #aspitzenbox,.fern #akuehlbox{display:none!important}
+.zpuhr{font:700 20px var(--mono);min-width:96px;min-height:40px;padding:0 14px;background:var(--panel);color:var(--text);border:1px solid var(--linie2);border-radius:8px;cursor:pointer}
+.zpuhr:hover{border-color:var(--bernstein)}
+dialog#uhr{background:var(--kopf);color:var(--text);border:1px solid var(--linie2);border-radius:16px;padding:22px 24px;width:340px;max-width:calc(100vw - 32px);box-sizing:border-box}
+dialog#uhr::backdrop{background:rgba(0,0,0,.6)}
+.uhranzeige{display:flex;justify-content:center;align-items:baseline;gap:4px;font:700 46px var(--mono);margin-bottom:14px}
+.uhranzeige span{cursor:pointer;padding:2px 8px;border-radius:8px;color:var(--leise)}
+.uhranzeige span.an{color:var(--bernstein);background:var(--aktiv)}
+#uhrblatt{display:block;margin:0 auto;touch-action:none;cursor:pointer;user-select:none}
+#uhrblatt text{font:600 15px var(--sans);fill:var(--text2);text-anchor:middle;dominant-baseline:central;pointer-events:none}
+#uhrblatt text.innen{font-size:13px;fill:var(--stumm)}
+#uhrblatt text.gewaehlt{fill:#0B0E11}
+.zpliste{display:flex;flex-direction:column;gap:8px}
+.zpzeile{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;padding:10px 12px;background:var(--feld);border-radius:8px}
+.zpzeile.inaktiv{opacity:.55}
+.zpzeile .eingabe{width:auto;margin:0;min-height:40px}
+.zpzeile select.eingabe{min-width:92px;font-weight:700}
+.zpzeile select.eingabe.aus{color:var(--alarm)} .zpzeile select.eingabe.an{color:var(--ok)}
+.zptage{display:flex;gap:6px;flex-wrap:wrap}
+.zptag{min-width:44px;min-height:40px;padding:0 6px;border:1px solid var(--linie2);background:var(--panel);color:var(--stumm);border-radius:8px;cursor:pointer;font-weight:600}
+.zptag.an{border-color:var(--bernstein);color:var(--bernstein);background:var(--aktiv)}
+.zpart{font-size:13px;color:var(--leise);min-width:120px}
+.zpaktiv{display:flex;align-items:center;gap:6px;color:var(--text2);font-size:14px;cursor:pointer}
+.zpaktiv input{width:20px;height:20px;accent-color:var(--bernstein)}
+.zpstatus{display:flex;flex-wrap:wrap;gap:10px}
+.zpstatus .feld{flex:1 1 220px}
+.zpleer{color:var(--leise);font-size:14px;padding:6px 2px}
+
+.frage{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.6);padding:20px}
+.frage.auf{display:flex}
+.frage .kasten{width:560px;max-width:100%;box-sizing:border-box;background:var(--kopf);border:2px solid var(--alarm);border-radius:16px;padding:30px 34px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.frage b{display:block;font-family:'Exo',var(--schmal);font-size:30px;letter-spacing:.08em;color:var(--alarm);margin-bottom:12px}
+.frage p{margin:0 0 26px;color:var(--text2);font-size:19px;line-height:1.45}
+.frage .reihe{margin:0;justify-content:flex-end;gap:14px}
+.frage .knopf{min-height:56px;padding:0 26px;font-size:18px}
+#pcfrage .reihe{flex-wrap:nowrap;gap:12px}
+#pcfrage .knopf{padding:0 20px;white-space:nowrap}
+#pcfrage #pcruhe{background:#F2A33A;border-color:#F2A33A;color:#1A1205;font-weight:700}
+#pcfrage #pcruhe:hover{background:#FFB858;border-color:#FFB858}
+#pcfrage #pcja{background:#D9363E;border-color:#D9363E;color:#FFFFFF;font-weight:700}
+#pcfrage #pcja:hover{background:#EC4850;border-color:#EC4850}
+@media (max-width:560px){#pcfrage .reihe{flex-wrap:wrap}#pcfrage .reihe span{display:none}#pcfrage .knopf{flex:1 1 auto}}
+@media (max-width:760px){.frage .kasten{padding:22px}.frage b{font-size:22px}.frage p{font-size:16px;margin-bottom:20px}.frage .knopf{padding:0 16px;font-size:16px}}
+.feld{background:var(--feld);border-radius:8px;padding:7px 13px 11px;min-width:0}
+.feld small{display:block;font-size:13.5px;font-weight:600;letter-spacing:.1em;color:var(--leise)}
+.feld b{display:block;font-family:var(--mono);font-weight:500;font-size:21px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.feld.warn b{color:var(--warn)} .feld.alarm b{color:var(--alarm)}
+.feld b em{font-style:normal;font-size:14px;color:var(--leise)}
+.wkopf{display:flex;align-items:flex-end;gap:14px 26px;flex-wrap:wrap}
+.trend{display:flex;align-items:center;gap:8px;font-size:17px;color:var(--leise);padding-bottom:12px}
+.tpfeil{font-size:20px;line-height:1}
+.tpfeil.steigt{color:var(--alarm)} .tpfeil.faellt{color:var(--ok)} .tpfeil.steht{color:var(--leise)}
+.wkurve{position:relative;flex:1 1 auto;min-height:210px;background:var(--feld);border-radius:8px;touch-action:pan-y}
+.wkurve svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.wkurve text{fill:var(--stumm);font-family:var(--mono);font-size:11px}
+.wkurve .hilf{stroke:var(--linie);stroke-width:1}
+.wkurve .info{position:absolute;top:8px;pointer-events:none;background:var(--kopf);border:1px solid var(--bernstein);border-radius:8px;padding:8px 10px;font-family:var(--mono);font-size:13px;line-height:1.5;white-space:nowrap;display:none}
+.wleg{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--leise)}
+.wleg i{display:inline-block;width:18px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
+.verlauf{height:70px;display:flex;align-items:flex-end;gap:2px}
+.verlauf div{flex:1;background:var(--balken);border-radius:2px 2px 0 0;min-height:2px}
+.klein{display:flex;gap:18px;flex-wrap:wrap;font-family:var(--mono);font-size:16px;color:var(--text2)}
+.waechter{display:flex;flex-direction:column;gap:6px}
+.waechter .zeile{display:flex;justify-content:space-between;gap:8px;font-size:15px}
+.waechter .zeile b{font-family:var(--mono);font-weight:500}
+.leiste{position:relative;height:10px;background:var(--feld);border-radius:4px;overflow:hidden}
+.leiste .zone{position:absolute;top:0;bottom:0}
+.leiste .zone.w{background:color-mix(in srgb,var(--warn) 22%,transparent)}
+.leiste .zone.a{background:color-mix(in srgb,var(--alarm) 30%,transparent);border-left:2px solid var(--alarm)}
+.leiste .fuell{position:absolute;left:0;top:2px;bottom:2px;background:var(--ok);border-radius:3px;width:0;transition:width .6s}
+.skala{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--stumm);margin-top:2px}
+.leiste.warn .fuell{background:var(--warn)} .leiste.alarm .fuell{background:var(--alarm)}
+.hinweis{margin:0;font-size:14px;color:var(--leise);line-height:1.5}
+.marke-klein{font-size:13px;color:var(--bernstein);border:1px solid var(--warn-rand);border-radius:4px;padding:2px 8px;font-family:var(--sans);letter-spacing:0}
+.liste{display:flex;flex-direction:column}
+.liste div{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--linie);font-size:15px}
+.liste div b{font-family:var(--mono);font-weight:500}
+.lkopf{display:flex;justify-content:space-between;align-items:center;width:100%;background:none;border:0;border-bottom:1px solid var(--linie);color:var(--text);font:inherit;font-size:15px;padding:8px 0;cursor:pointer;text-align:left}
+.liste[hidden]{display:none}
+.lkopf b{font-family:var(--mono);font-weight:500}
+.lkopf .pfeil{display:inline-block;width:1em;transition:transform .15s}
+.lkopf[aria-expanded="true"] .pfeil{transform:rotate(90deg)}
+.unten{display:none}
+dialog#qr{background:var(--panel);color:var(--text);border:1px solid var(--linie2);border-radius:14px;padding:28px;max-width:360px;text-align:center}
+dialog#qr::backdrop{background:rgba(0,0,0,.6)}
+#qrbild{background:#fff;padding:14px;border-radius:10px;display:inline-block;margin:14px 0}
+#qrbild img,#qrbild canvas{display:block}
+#qradresse{font-family:var(--mono);font-size:16px;color:var(--bernstein);word-break:break-all}
+.tip{position:fixed;z-index:20;pointer-events:none;max-width:300px;background:var(--kopf);color:var(--text);border:1px solid var(--bernstein);border-radius:8px;padding:8px 11px;font-size:14px;line-height:1.4;box-shadow:0 8px 24px rgba(0,0,0,.4);display:none}
+[data-tip]{cursor:help}
+.steuer{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.steuer select{min-height:44px;background:var(--feld);color:var(--text);border:1px solid var(--linie2);border-radius:8px;padding:0 10px;font:inherit;font-size:15px;max-width:100%}
+.steuer select:focus{outline:2px solid var(--bernstein);outline-offset:1px}
+.steuer .wahl{display:flex;align-items:center;gap:8px;min-width:0}
+.steuer .dazu{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 12px;background:var(--feld);border:1px solid var(--linie2);border-radius:8px;font-size:15px;cursor:pointer;user-select:none}
+.steuer .dazu input{accent-color:var(--bernstein);width:18px;height:18px;margin:0}
+.steuer .punkt{width:12px;height:12px;border-radius:50%;flex:none}
+.diagramm{position:relative;width:100%;height:300px;background:var(--feld);border-radius:8px;touch-action:none}
+.diagramm svg{display:block;width:100%;height:100%}
+.diagramm .linie-hilf{stroke:var(--linie);stroke-width:1}
+.diagramm text{fill:var(--stumm);font-family:var(--mono);font-size:11px}
+.diagramm .zeiger{stroke:var(--text2);stroke-width:1;stroke-dasharray:3 3}
+.diagramm .info{position:absolute;top:8px;pointer-events:none;background:var(--kopf);border:1px solid var(--bernstein);border-radius:8px;padding:8px 10px;font-family:var(--mono);font-size:13px;line-height:1.5;white-space:nowrap;display:none}
+.legende{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.legende .feld b{font-size:16px}
+details.aufklapp summary{cursor:pointer;font-family:'Exo',var(--schmal);font-weight:600;font-size:15px;letter-spacing:.16em;color:var(--leise);padding:8px 0;list-style:none}
+details.aufklapp summary::-webkit-details-marker{display:none}
+details.aufklapp summary::before{content:"▸ ";color:var(--bernstein)}
+details.aufklapp[open] summary::before{content:"▾ "}
+/* Steuerung zum Ausklappen: beim Laden immer zu, damit beim Scrollen am Handy nichts verstellt wird */
+details.steuer{display:block;margin-top:10px;border:1px solid var(--linie2);border-radius:8px;padding:0 12px}
+details.steuer summary{min-height:44px;display:flex;align-items:center;gap:6px;color:var(--bernstein)}
+details.steuer[open]{padding-bottom:12px}
+.seit{font-family:var(--sans);letter-spacing:0;text-transform:none;font-weight:400;color:var(--stumm);margin-left:4px}
+/* Ein Schloss für alle Steuerungen */
+#schloss{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation;white-space:nowrap}
+#schloss.halten{border-color:var(--bernstein);color:var(--bernstein)}
+#schloss.offen{background:var(--ok);border-color:var(--ok);color:#06130B;font-weight:700}
+.gesperrt details.steuer > :not(summary){opacity:.85;pointer-events:none;cursor:not-allowed}   /* Schrift gut lesbar lassen (Oli 22.11.) */
+.gesperrt details.steuer summary::after{content:"🔒 gesperrt";margin-left:auto;font-size:12px;letter-spacing:.06em;color:var(--leise)}
+table.spitzen{width:100%;border-collapse:collapse;font-size:15px}
+table.spitzen td,table.spitzen th{padding:7px 4px;border-bottom:1px solid var(--linie);text-align:left}
+table.spitzen th{font-family:var(--schmal);letter-spacing:.12em;font-weight:600;font-size:13px;color:var(--stumm)}
+table.spitzen td.z{font-family:var(--mono);text-align:right}
+.fehler{grid-column:span 12;background:var(--alarm-grund);border:1px solid var(--alarm-rand);color:var(--alarm);border-radius:10px;padding:12px 16px;display:none}
+@media (max-width:1100px){.s7,.s5{grid-column:span 12}.s4{grid-column:span 6}}
+@media (max-width:760px){
+  .kopf{padding:12px 16px}
+  .rahmen{padding:14px 12px 96px;gap:14px}
+  nav.seite{display:none}
+  main{gap:12px}
+  .s4{grid-column:span 12}
+  .panel{padding:18px}
+  .wasserzahl{font-size:72px!important}
+  .unten{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;position:fixed;left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom));background:var(--kopf);border:1px solid var(--linie);border-radius:12px;padding:6px;z-index:6}
+  .unten a{min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:8px;color:var(--text2);text-decoration:none;font-size:14px}
+  .unten a.an{background:var(--aktiv);color:var(--bernstein);font-weight:600}
+  .laufzeit{display:none}
+  .steuer .wahl{flex:1 1 100%}
+  .steuer .wahl select{flex:1;min-width:0}
+  table.spitzen{font-size:13px}
+  table.spitzen td.z{white-space:nowrap}
+  .unten a{font-size:13px}
+  .nurpc{display:none}
+}
+/* ===== Einzelseiten (seit 22.11.2026, wie Futsal-App) ===== */
+a.marke{color:inherit;text-decoration:none}
+.seitenkopf{grid-column:1/-1;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.zurueck{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border:1px solid var(--linie2);border-radius:8px;color:var(--text2);text-decoration:none;font-weight:600}
+.zurueck:hover{border-color:var(--bernstein);color:var(--bernstein)}
+.seitenpille{font-family:'Exo',var(--schmal);font-weight:600;letter-spacing:.16em;font-size:15px;color:var(--gruen);border:1px solid var(--gruen);border-radius:999px;padding:6px 16px;text-transform:uppercase}
+.kacheln{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+a.kachel{display:flex;flex-direction:column;gap:12px;background:var(--panel);border:1px solid var(--rahmen);box-shadow:inset 3px 0 0 var(--gruen);border-radius:12px;padding:16px 20px;color:var(--text);text-decoration:none;min-height:150px}
+a.kachel:hover{border-color:var(--bernstein)}
+a.kachel.warn{box-shadow:inset 3px 0 0 var(--warn)} a.kachel.alarm{box-shadow:inset 3px 0 0 var(--alarm);border-color:var(--alarm)}
+a.kachel h2{margin:0;line-height:1.2;font-family:'Exo',var(--schmal);font-weight:600;font-size:18px;letter-spacing:.14em;color:var(--text);display:flex;justify-content:space-between;align-items:center;gap:8px}
+a.kachel h2::after{content:"›";color:var(--bernstein);font-size:26px;line-height:1}
+.kwerte{display:flex;flex-direction:column;gap:8px}
+.kwerte div{display:flex;justify-content:space-between;align-items:baseline;gap:10px;color:var(--text2)}
+.kwerte span{white-space:nowrap}
+.kwerte b{font-family:var(--mono);font-size:20px;color:var(--text);font-weight:600;text-align:right}
+.kwerte em{font-style:normal;font-size:13px;color:var(--leise);margin-left:4px}
+.ktext{color:var(--leise);font-size:15px}
+.s6{grid-column:span 6}
+@media (max-width:1100px){.s6{grid-column:span 12}}
+@media (max-width:760px){.kacheln{grid-template-columns:1fr 1fr;gap:12px} a.kachel{padding:14px;min-height:0} .kwerte b{font-size:17px} .kwerte div{flex-direction:column;gap:0;align-items:flex-start}}
+

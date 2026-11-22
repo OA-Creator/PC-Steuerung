@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="de">
+<head>
+<!-- Atomkraftwerk Leitstand · Seite: Strom & Kosten · Stand 23.11.2026 00:10 (Einzelseiten wie Futsal-App; gemeinsam: leitstand.css, leitstand.js) -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B0E11">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@500;700&family=Exo:wght@600&display=swap" rel="stylesheet">
+<title>Atomkraftwerk · Strom & Kosten</title>
+<script src="fern-start.js"></script>
+<link rel="stylesheet" href="leitstand.css">
+</head>
+<body data-seite="strom">
+<header class="kopf">
+  <a class="marke" href="index.html" data-tip="Zur Übersicht">
+    <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true" fill="none" stroke="var(--bernstein)" stroke-width="2"><circle cx="17" cy="17" r="4"/><path d="M17 3a14 14 0 0 1 12.1 7L21 14.8A4.6 4.6 0 0 0 17 12.4Z"/><path d="M5 24a14 14 0 0 1 0-14l8 4.6a4.6 4.6 0 0 0 0 4.8Z"/><path d="M29 24a14 14 0 0 1-24 0l8-4.6a4.6 4.6 0 0 0 8 0Z"/></svg>
+    <div><b>ATOMKRAFTWERK</b><small>LEITSTAND · OAPC</small></div>
+  </a>
+  <div class="rechts">
+    <span class="pille" id="pille" role="status" data-tip="Gesamtzustand aller Werte: grün = alles normal, gelb = Warnung, rot = Alarm"><i></i><span id="pilletext">verbinde …</span></span>
+    <span class="laufzeit" id="laufzeit" data-tip="Wie lange der PC heute läuft (gezählt, solange das Atomkraftwerk-Programm läuft)"></span>
+    <button class="knopf nurpc" id="handyknopf" type="button" data-tip="QR-Code anzeigen, um den Leitstand aufs Handy zu holen">Aufs Handy</button>
+    <button class="knopf" id="schloss" type="button" data-tip="Schutz gegen versehentliches Verstellen: zum Ändern 1 Sekunde gedrückt halten. Sperrt sich nach 60 Sekunden ohne Bedienung wieder">🔒 Gesperrt</button>
+    <button class="knopf" id="thema" type="button" data-tip="Zwischen hellem und dunklem Aussehen umschalten">Hell</button>
+  </div>
+</header>
+
+<div class="rahmen">
+  <nav class="seite" aria-label="Bereiche">
+    <div class="titel">ANLAGE</div>
+    <a href="index.html" data-seite="uebersicht">Übersicht</a>
+    <a href="kuehlung.html" data-seite="kuehlung">Kühlkreislauf</a>
+    <a href="cpu-gpu.html" data-seite="cpugpu">Prozessor &amp; Grafik</a>
+    <a href="board.html" data-seite="board">Board-Wächter</a>
+    <a href="strom.html" data-seite="strom">Strom &amp; Kosten</a>
+    <a href="auswertung.html" data-seite="auswertung">Auswertung</a>
+    <a href="zeitplan.html" data-seite="zeitplan">Zeitplan</a>
+    <a href="steuerung.html" data-seite="steuerung">Steuerung</a>
+    <div class="titel" style="padding-top:18px">AUSBAU</div>
+    <a href="#" class="spaeter" aria-disabled="true" data-tip="Balkonkraftwerk: erzeugter Strom – kommt 2027">Erzeugung <span>2027</span></a>
+    <a href="#" class="spaeter" aria-disabled="true" data-tip="Balkonkraftwerk: Batteriespeicher – kommt 2027">Speicher <span>2027</span></a>
+  </nav>
+
+  <main>
+        <div class="stand" id="stand">PC aus – Stand von <b id="standzeit">—</b> Uhr <a id="pcstart" class="startknopf" href="http://fritz.box/#/network" target="_blank" rel="noopener" data-tip="Öffnet die FRITZ!Box. Dort beim PC auf „Computer starten“ tippen">PC starten</a></div>
+    <div class="fehler" id="fehler">Keine Verbindung zum Atomkraftwerk. Läuft das Programm?</div>
+    <div class="seitenkopf"><a class="zurueck" href="index.html">← Übersicht</a><span class="seitenpille">Strom &amp; Kosten</span></div>
+    <section class="panel s12" id="strom">
+      <h2>STROM · FRITZ!DECT-STECKDOSE <span class="marke-klein" id="strommarke" data-tip="Verbindung zur FRITZ!Box">verbinde …</span></h2>
+      <div class="felder" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
+        <div class="feld" id="sjetzttip" data-tip="Was der ganze PC gerade an der Steckdose zieht"><small>JETZT</small><b id="sjetzt">— <em>W</em></b></div>
+        <div class="feld" id="sheutetip" data-tip="Verbrauch heute, Standby mitgezählt"><small>HEUTE</small><b id="sheute">— <em>kWh</em></b></div>
+        <div class="feld" data-tip="Durchschnittlicher Verbrauch pro Tag in diesem Monat (im ersten Monat ab Beginn der Strommessung)"><small>MONAT Ø / TAG</small><b id="sschnitt">— <em>kWh</em></b></div>
+        <div class="feld" id="sgesamttip" data-tip="Verbrauch seit Beginn der Messung"><small>GESAMT <span class="seit" id="sgesamtseit"></span></small><b id="sgesamt">— <em>kWh</em></b></div>
+        <div class="feld" id="sstandbytip" data-tip="Was an der Steckdose gezogen wurde, während der PC zuletzt aus war (aus dem Zähler der FRITZ!Box). Wird beim nächsten Start berechnet"><small>STANDBY (PC AUS)</small><b id="sstandby">— <em>W</em></b></div>
+        <div class="feld" data-tip="Wie lange der PC heute läuft"><small>LAUFZEIT HEUTE</small><b id="laufzeit2">—</b></div>
+        <div class="feld" id="stemptip" data-tip="Temperatur am Fühler der FRITZ!-Steckdose (sitzt unten an der Wand unter dem PC-Brett)"><small>STECKDOSE</small><b id="stemp">— <em>°C</em></b></div>
+      </div>
+      <div class="kostenreihe">
+        <div class="feld" id="skostenheutetip" data-tip="Stromkosten heute, Standby mitgezählt. Wird alle 5 Minuten aus der FRITZ!Box aktualisiert"><small>KOSTEN HEUTE</small><b id="skostenheute" style="color:var(--bernstein)">— <em>€</em></b></div>
+        <div class="feld" id="skostentip" data-tip="Stromkosten in diesem Monat (Strompreis steht in atomkraftwerk.json)"><small>KOSTEN MONAT</small><b id="skosten" style="color:var(--bernstein)">— <em>€</em></b></div>
+        <div class="feld" id="skostengesamttip" data-tip="Stromkosten seit Beginn der Messung (Strompreis steht in atomkraftwerk.json)"><small>KOSTEN GESAMT <span class="seit" id="skostenseit"></span></small><b id="skostengesamt" style="color:var(--bernstein)">— <em>€</em></b></div>
+      </div>
+          <details class="aufklapp steuer" id="szsteuer">
+      <summary>ZÄHLER ZURÜCKSETZEN</summary>
+      <div class="reihe">
+        <button class="knopf rot" type="button" id="szurueck" data-tip="Setzt GESAMT und KOSTEN GESAMT auf 0. Die Steckdose zählt intern weiter, das Programm zieht den Stand ab">Gesamt auf 0 setzen</button>
+        <span class="hmeldung" id="szmeldung"></span>
+      </div>
+      </details>
+    </section>
+
+  </main>
+</div>
+
+<nav class="unten" aria-label="Bereiche">
+  <a href="kuehlung.html" data-seite="kuehlung">Kühlung</a>
+  <a href="cpu-gpu.html" data-seite="cpugpu">CPU/GPU</a>
+  <a href="board.html" data-seite="board">Board</a>
+  <a href="strom.html" data-seite="strom">Strom</a>
+  <a href="auswertung.html" data-seite="auswertung">Analyse</a>
+  <a href="zeitplan.html" data-seite="zeitplan">Zeitplan</a>
+  <a href="steuerung.html" data-seite="steuerung">Steuern</a>
+</nav>
+
+<dialog id="uhr" aria-label="Uhrzeit wählen">
+  <div class="uhranzeige"><span id="uhrh" class="an">23</span>:<span id="uhrm">00</span></div>
+  <svg id="uhrblatt" width="280" height="280" viewBox="0 0 280 280"></svg>
+  <div class="reihe" style="justify-content:flex-end"><button class="knopf" type="button" id="uhrnein">Abbrechen</button><button class="knopf" type="button" id="uhrja" style="color:var(--bernstein);border-color:var(--bernstein)">OK</button></div>
+</dialog>
+<dialog id="qr" aria-labelledby="qrtitel">
+  <h2 id="qrtitel" style="margin:0;font-family:var(--schmal);letter-spacing:.12em;font-size:20px">LEITSTAND AUFS HANDY</h2>
+  <p class="hinweis" style="margin:10px 0 0">Mit der Handy-Kamera scannen – das Handy muss im WLAN zu Hause sein.</p>
+  <div id="qrbild"></div>
+  <div id="qradresse"></div>
+  <p class="hinweis" style="margin:14px 0 18px;font-size:13px">Danach im Browser-Menü „Zum Startbildschirm hinzufügen".</p>
+  <form method="dialog"><button class="knopf" style="width:100%">Schließen</button></form>
+</dialog>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="leitstand.js"></script>
+</body>
+</html>

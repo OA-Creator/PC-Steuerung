@@ -84,10 +84,8 @@ public sealed class Anlage
         var g = _e.Grenzen;
         lock (_sperre)
         {
-            // Wassertemperatur fuer den Durchfluss-Alarm: high flow NEXT, sonst iCUE
-            double? wasser = _werte.TryGetValue("flow.wasser", out var fw) ? fw.Aktuell : null;
-            wasser ??= _werte.Values.Where(x => x.Id.StartsWith("icue.") && x.Einheit == "°C" && x.Gruppe != "Luft" && x.Aktuell != null)
-                                    .Select(x => x.Aktuell).Max();
+            // Wassertemperatur fuer den Durchfluss-Alarm: Behaelter (iCUE), sonst high flow NEXT
+            double? wasser = BehaelterOhneSperre();
             bool wasserWarm = g.FlussAlarmAbWasserC <= 0 || (wasser != null && wasser >= g.FlussAlarmAbWasserC);
             foreach (var m in _werte.Values)
             {
@@ -160,6 +158,16 @@ public sealed class Anlage
         if (sek <= 0 || sek > 120) return; // Standby/Pause nicht mitzählen
         var tag = jetzt.ToString("yyyy-MM-dd");
         lock (_sperre) { _laufzeit[tag] = (_laufzeit.TryGetValue(tag, out var s) ? s : 0) + sek; }
+    }
+
+    // Massstab Wassertemperatur: Fuehler im Behaelter (iCUE); laeuft iCUE nicht, der Fuehler am high flow NEXT
+    public double? BehaelterWasser() { lock (_sperre) return BehaelterOhneSperre(); }
+    private double? BehaelterOhneSperre()
+    {
+        var b = _werte.Values.Where(x => x.Id.StartsWith("icue.") && x.Einheit == "°C" && x.Aktuell != null
+                                         && System.Text.RegularExpressions.Regex.IsMatch(x.Name, "beh|wasser|coolant|reservoir", System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+                             .Select(x => x.Aktuell).FirstOrDefault();
+        return b ?? (_werte.TryGetValue("flow.wasser", out var fw) ? fw.Aktuell : null);
     }
 
     // Kurzer Text für die Handy-Meldung beim Herunterfahren
@@ -239,7 +247,7 @@ public sealed class Anlage
                 {
                     eingerichtet = Strom.Eingerichtet, verbunden = Strom.Verbunden, meldung = Strom.Meldung, stand = Strom.Stand,
                     heuteKWh = Rund(Strom.HeuteKWh), monatKWh = Rund(Strom.MonatKWh), schnittTagKWh = Rund(Strom.SchnittTagKWh),
-                    gesamtKWh = Rund(Strom.GesamtKWh), kostenHeuteEuro = Rund(Strom.KostenHeuteEuro), kostenMonatEuro = Rund(Strom.KostenMonatEuro),
+                    gesamtKWh = Rund(Strom.GesamtKWh), gesamtSeit = Strom.GesamtSeit, kostenHeuteEuro = Rund(Strom.KostenHeuteEuro), kostenMonatEuro = Rund(Strom.KostenMonatEuro),
                     standbyWatt = Strom.StandbyWatt, standbyKWh = Strom.StandbyKWh, standbyVon = Strom.StandbyVon, standbyBis = Strom.StandbyBis
                 },
                 werte = _reihenfolge.Select(id => _werte[id]).Select(m => new

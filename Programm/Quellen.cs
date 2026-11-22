@@ -18,6 +18,8 @@ public sealed class HardwareQuelle : IDisposable
 
     private ISensor? _cpuTemp, _cpuWatt, _cpuLast, _gpuTemp, _gpuHot, _gpuWatt, _gpuLast, _gpuLuefter, _ram, _vrm, _soc, _pch;
     private ISensor? _fluss, _flussWasser, _leitwert, _qualitaet;
+    private AdlPlatine? _adl;          // Platinenleistung wie in Adrenalin (seit 05.11.2026)
+    private bool _adlGemeldet;
     private readonly List<(string id, string modell, ISensor temp)> _laufwerke = new();
     // Lüfter- und Pumpenanschlüsse am Board (Drehzahl + Ansteuerung in %), nur lesen
     private readonly List<(string id, string name, string einheit, ISensor s)> _boardLuefter = new();
@@ -68,6 +70,10 @@ public sealed class HardwareQuelle : IDisposable
         _gpuLast = Finde(g1, SensorType.Load, "GPU Core");
         _gpuLuefter = Finde(g1, SensorType.Fan, "GPU Fan");
         GpuName = gpu?.Name ?? "";
+        _adl?.Dispose();
+        _adl = gpu?.HardwareType == HardwareType.GpuAmd ? new AdlPlatine(GpuName) : null;
+        _adlGemeldet = false;
+        Log.Schreiben(_adl?.Bereit == true ? $"GPU-Leistung: Platine über AMD-Treiber (ADL) für {GpuName}, Adapter: {_adl.Adapterliste}" : $"GPU-Leistung: nur LHM \"GPU Package\" ({_adl?.Hinweis ?? "keine AMD-Karte"})");
 
         // nur der echte RAM ("Total Memory") – "Virtual Memory" (RAM + Auslagerungsdatei) hat denselben Sensornamen
         var mem = AlleHardware.Where(h => h.HardwareType == HardwareType.Memory && !h.Name.Contains("Virtual", StringComparison.OrdinalIgnoreCase)).ToList();
@@ -184,7 +190,16 @@ public sealed class HardwareQuelle : IDisposable
         a.Wert("cpu.last").Setzen(_cpuLast?.Value);
         a.Wert("gpu.temp").Setzen(_gpuTemp?.Value);
         a.Wert("gpu.hotspot").Setzen(_gpuHot?.Value);
-        a.Wert("gpu.watt").Setzen(_gpuWatt?.Value);
+        var (platine, chip) = _adl?.Lesen() ?? (null, null);
+        if (!_adlGemeldet && _adl?.Bereit == true)
+        {
+            _adlGemeldet = true;
+            Log.Schreiben($"GPU-Leistung erste Messung: Platine {platine?.ToString() ?? "–"} W, Chip (ADL) {chip?.ToString() ?? "–"} W, LHM GPU Package {_gpuWatt?.Value?.ToString("0") ?? "–"} W");
+        }
+        // gpu.watt = ganze Platine wie Adrenalin "Gesamtleistung der Platine"; ohne ADL-Wert wie bisher LHM "GPU Package"
+        a.Wert("gpu.watt").Setzen(platine ?? _gpuWatt?.Value);
+        // bisheriger Wert (Chip) zum Vergleich mit den alten Aufzeichnungen
+        a.Wert("gpu.chip", "GPU Chip-Leistung", "Grafik", "W").Setzen(_gpuWatt?.Value ?? chip);
         a.Wert("gpu.last").Setzen(_gpuLast?.Value);
         a.Wert("gpu.luefter").Setzen(_gpuLuefter?.Value);
         a.Wert("ram.belegt").Setzen(_ram?.Value);
@@ -204,6 +219,7 @@ public sealed class HardwareQuelle : IDisposable
     public void Dispose()
     {
         try { if (Offen) _pc.Close(); } catch { }
+        try { _adl?.Dispose(); } catch { }
     }
 }
 

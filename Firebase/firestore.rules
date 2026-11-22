@@ -1,0 +1,16 @@
+rules_version = '2';
+// Atomkraftwerk – nur Oli darf lesen; schreiben darf das Handy nur den Zeitplan-Wunsch.
+// Der PC schreibt mit seinem Dienstkonto (firebase-zugang.json) und braucht keine Regel.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function oli() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email == 'olav.andelewski@gmail.com';
+    }
+    match /akw/{dok} {
+      allow read: if oli();
+      allow write: if oli() && dok == 'zeitplanWunsch';
+    }
+  }
+}

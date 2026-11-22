@@ -1,0 +1,10 @@
+PC-Start (Android-App)
+
+Weckt den PC per Wake-on-LAN, wenn sich das Handy mit dem Heim-WLAN verbindet.
+Gebaut am 19.11.2026 mit bauen.sh (Linux: android-sdk-platform-23, aapt, dalvik-exchange, zipalign, apksigner).
+
+WICHTIG: schluessel\pcstart.jks aufheben! Nur mit diesem Schluessel lassen sich spaetere Versionen
+als Update ueber die installierte App spielen. Kennwort: (nicht im Netz – steht nur lokal)
+
+Version 1.3 (22.11.2026): Dauerwaechter (Waechter.java) mit stiller Zeile "PC-Start wacht" statt WlanMelder-Anmeldung,
+Sperre einstellbar (aus/5/15/30 min), Meldung "Gespeichert", Tage-Knoepfe einzeilig. targetSdk 33 (baut mit android.jar 23).

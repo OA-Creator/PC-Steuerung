@@ -26,6 +26,8 @@ public sealed class StromStand
     public double? MonatKWh { get; set; }
     public double? SchnittTagKWh { get; set; }
     public double? GesamtKWh { get; set; }
+    // seit wann "Gesamt" zählt (leer = seit Messbeginn); seit 23.11.2026 im Leitstand zurücksetzbar
+    public string GesamtSeit { get; set; } = "";
     public double? KostenHeuteEuro { get; set; }
     public double? KostenMonatEuro { get; set; }
     public string Stand { get; set; } = "";
@@ -66,6 +68,10 @@ public sealed class FritzQuelle
     private double _laufWhSeitZaehler, _laufWhSeitStart;
     private DateTime _letzteWattZeit = DateTime.MinValue, _letzterMerker = DateTime.MinValue;
     private bool _standbyGerechnet;
+    // Zurücksetzen von "Gesamt": Die Steckdose zählt immer weiter, darum merken wir uns den Zählerstand beim
+    // Zurücksetzen (daten\strom-gesamt.json) und ziehen ihn ab. atomkraftwerk.json bleibt unberührt.
+    private string GesamtDatei => Path.Combine(Path.GetDirectoryName(_beginnDatei)!, "strom-gesamt.json");
+    private double _gesamtAbWh;
     private string MerkerDatei => Path.Combine(Path.GetDirectoryName(_beginnDatei)!, "standby-merker.json");
     private string StandbyDatei => Path.Combine(Path.GetDirectoryName(_beginnDatei)!, "standby.json");
 
@@ -89,10 +95,34 @@ public sealed class FritzQuelle
             }
         }
         catch { }
+        try
+        {
+            if (File.Exists(GesamtDatei))
+            {
+                using var g = System.Text.Json.JsonDocument.Parse(File.ReadAllText(GesamtDatei));
+                _gesamtAbWh = g.RootElement.GetProperty("abWh").GetDouble();
+                Stand.GesamtSeit = g.RootElement.GetProperty("seit").GetString() ?? "";
+            }
+        }
+        catch { }
+        // Noch nie zurückgesetzt: "Gesamt" zählt seit Beginn der Strommessung
+        if (Stand.GesamtSeit == "" && _messbeginn is DateTime mb) Stand.GesamtSeit = mb.ToString("dd.MM.yyyy", CultureInfo.GetCultureInfo("de-DE"));
         _f = e.Fritz;
         _preisCent = e.StrompreisCentProKWh;
         Stand.Eingerichtet = !string.IsNullOrWhiteSpace(_f.Kennwort);
         Stand.Meldung = Stand.Eingerichtet ? "verbinde …" : "Kennwort in atomkraftwerk.json fehlt";
+    }
+
+    // "Gesamt" auf 0 setzen (Knopf im Leitstand, Seite Strom). Leerer Text = geklappt, sonst Grund.
+    public string GesamtZuruecksetzen()
+    {
+        if (_zaehlerWh is not double zw) return "Zählerstand der Steckdose noch nicht gelesen – in ein paar Minuten noch einmal versuchen.";
+        var seit = DateTime.Now.ToString("dd.MM.yyyy HH:mm", CultureInfo.GetCultureInfo("de-DE"));
+        try { File.WriteAllText(GesamtDatei, System.Text.Json.JsonSerializer.Serialize(new { abWh = zw, seit })); }
+        catch (Exception ex) { return "Konnte nicht gespeichert werden: " + ex.Message; }
+        _gesamtAbWh = zw; Stand.GesamtKWh = 0; Stand.GesamtSeit = seit;
+        Log.Schreiben($"Strom: Gesamt im Leitstand auf 0 gesetzt (Zählerstand Steckdose {zw / 1000.0:0.000} kWh).");
+        return "";
     }
 
     // Läuft im Hintergrund, damit eine langsame FRITZ!Box den Messlauf nicht aufhält
@@ -145,7 +175,7 @@ public sealed class FritzQuelle
             var gesamt = await BefehlAsync("getswitchenergy");
             if (gesamt is not null && double.TryParse(gesamt.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var wh))
             {
-                Stand.GesamtKWh = wh / 1000.0;
+                Stand.GesamtKWh = (wh >= _gesamtAbWh ? wh - _gesamtAbWh : wh) / 1000.0;   // Steckdose neu? dann ganz zählen
                 StandbyRechnen(wh);
                 _zaehlerWh = wh; _zaehlerZeit = DateTime.Now; _laufWhSeitZaehler = 0;
             }

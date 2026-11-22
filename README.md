@@ -1,4 +1,16 @@
-# Atomkraftwerk – Leitstand für den eigenen PC
+# PC Steuerung (Leitstand Atomkraftwerk)
+
+Leitstand für den eigenen wassergekühlten PC – Werte sehen, Pumpe steuern, Strom und Kosten, Zeitplan, PC per Handy starten.
+
+### Neu seit November 2026
+- **Einzelseiten wie eine App:** Übersicht (Kühlkreislauf oben, darunter Kacheln) und eigene Seiten für Kühlung, CPU/GPU, Board, Strom, Auswertung, Zeitplan, Steuerung – gemeinsames Aussehen in `leitstand.css`, gemeinsames Skript in `leitstand.js`
+- **Schutz gegen Verstellen:** Steuerungen in Klappfeldern, ein Schloss in der Kopfleiste (1 Sekunde gedrückt halten = entsperrt, nach 60 Sekunden wieder zu)
+- **Strom:** Kosten gesamt mit „seit"-Datum, Zähler im Leitstand zurücksetzbar (`daten\strom-gesamt.json`)
+- **Zeitplan:** PC zu festen Zeiten in den Ruhezustand legen und wieder wecken; „PC ausschalten" mit Wahl Ruhezustand/Herunterfahren
+- **Fernansicht über Firebase** (`Firebase/`): Leitstand unterwegs und bei ausgeschaltetem PC, Stand alle 15 Minuten; ohne Firebase läuft am PC alles weiter
+- **Handy-App „PC-Start"** (`Handy-App/`, Android): weckt den PC per Wake-on-LAN, sobald das Handy ins Heim-WLAN kommt (Wächter mit stiller Benachrichtigung, Zeitfenster, Tage, Sperre)
+- Seiten laden sich bei neuer Version selbst neu (`version.json`)
+
 
 ![Leitstand](bilder/leitstand.png)
 

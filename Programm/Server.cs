@@ -17,8 +17,10 @@ public sealed class Server
     public string Adresse { get; private set; } = "";
     public Auswertung? Auswertung { get; set; }
     public PumpenSteuerung? Pumpe { get; set; }
-    public Func<Task>? VorDemHerunterfahren { get; set; }
+    public Func<string, Task>? VorDemHerunterfahren { get; set; }
     public Einstellungen? Einst { get; set; }
+    public Zeitplan? Zeitplan { get; set; }
+    public FritzQuelle? Fritz { get; set; }
     private readonly string _ordner;
 
     public Server(Anlage anlage, int port, string programmOrdner)
@@ -98,12 +100,31 @@ public sealed class Server
                 Senden(ctx, 200, "application/json; charset=utf-8", Encoding.UTF8.GetBytes(HandyJson(ctx)));
                 return;
             }
+            if (pfad == "/api/zeitplan" && Zeitplan != null)
+            {
+                var aktion = ctx.Request.HttpMethod == "POST" ? ctx.Request.QueryString["aktion"] : null;
+                string? koerper = null;
+                if (aktion == "speichern") { using var sr = new StreamReader(ctx.Request.InputStream, Encoding.UTF8); koerper = sr.ReadToEnd(); }
+                Senden(ctx, 200, "application/json; charset=utf-8", Encoding.UTF8.GetBytes(Zeitplan.Json(aktion, koerper)));
+                return;
+            }
+            if (pfad == "/api/strom/zuruecksetzen" && Fritz != null)
+            {
+                if (ctx.Request.HttpMethod != "POST") { Senden(ctx, 405, "text/plain", Encoding.UTF8.GetBytes("nur POST")); return; }
+                var fehler = Fritz.GesamtZuruecksetzen();
+                Senden(ctx, 200, "application/json; charset=utf-8", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new { ok = fehler == "", meldung = fehler, seit = Fritz.Stand.GesamtSeit })));
+                return;
+            }
             if (pfad == "/api/herunterfahren")
             {
                 if (ctx.Request.HttpMethod != "POST") { Senden(ctx, 405, "text/plain", Encoding.UTF8.GetBytes("nur POST")); return; }
-                Log.Schreiben("PC herunterfahren – im Leitstand angefordert.");
-                try { VorDemHerunterfahren?.Invoke().Wait(TimeSpan.FromSeconds(5)); } catch { }
-                Process.Start(new ProcessStartInfo("shutdown", "/s /t 5 /c \"Atomkraftwerk: PC wird heruntergefahren\"") { UseShellExecute = false, CreateNoWindow = true });
+                var ruhe = ctx.Request.QueryString["art"] == "ruhezustand";
+                Log.Schreiben(ruhe ? "PC in den Ruhezustand – im Leitstand angefordert." : "PC herunterfahren – im Leitstand angefordert.");
+                try { VorDemHerunterfahren?.Invoke(ruhe ? "Ruhezustand (Leitstand)" : "im Leitstand heruntergefahren").Wait(TimeSpan.FromSeconds(6)); } catch { }
+                if (ruhe)   // erst antworten, dann schlafen legen
+                    _ = Task.Run(async () => { await Task.Delay(3000); Process.Start(new ProcessStartInfo("shutdown", "/h") { UseShellExecute = false, CreateNoWindow = true }); });
+                else
+                    Process.Start(new ProcessStartInfo("shutdown", "/s /t 5 /c \"Atomkraftwerk: PC wird heruntergefahren\"") { UseShellExecute = false, CreateNoWindow = true });
                 Senden(ctx, 200, "application/json; charset=utf-8", Encoding.UTF8.GetBytes("{\"ok\":true}"));
                 return;
             }

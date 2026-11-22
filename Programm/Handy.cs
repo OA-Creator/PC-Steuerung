@@ -45,6 +45,42 @@ public static class Handy
         catch (Exception ex) { Log.Schreiben("Handy: letzter Stand nicht gesendet: " + ex.Message); }
     }
 
+    // Zeitplan: Vorwarnung vor dem Ruhezustand – hörbar, aber kein Alarm. Knopf "Abbrechen" ruft den Leitstand im Heimnetz auf.
+    public static async Task VorwarnungAsync(HandyEinstellungen h, string titel, string text, string? abbrechenUrl, string? leitstandUrl)
+    {
+        using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(8) };
+        var auftraege = new List<Task>();
+        if (!string.IsNullOrWhiteSpace(h.NtfyThema))
+        {
+            var knoepfe = new List<object>();
+            if (abbrechenUrl != null) knoepfe.Add(new { action = "http", label = "Abbrechen", url = abbrechenUrl, method = "POST", clear = true });
+            if (leitstandUrl != null) knoepfe.Add(new { action = "view", label = "Leitstand", url = leitstandUrl });
+            auftraege.Add(http.PostAsJsonAsync(h.NtfyServer.TrimEnd('/') + "/", new
+            {
+                topic = h.NtfyThema, title = titel, message = text,
+                priority = 3, tags = new[] { "zzz" }, actions = knoepfe.Count == 0 ? null : knoepfe
+            }));
+        }
+        if (!string.IsNullOrWhiteSpace(h.PushoverToken) && !string.IsNullOrWhiteSpace(h.PushoverBenutzer))
+            auftraege.Add(http.PostAsync("https://api.pushover.net/1/messages.json", new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["token"] = h.PushoverToken, ["user"] = h.PushoverBenutzer, ["title"] = titel, ["message"] = text, ["priority"] = "0",
+                ["url"] = leitstandUrl ?? "", ["url_title"] = "Leitstand öffnen (zum Abbrechen)"
+            })));
+        if (auftraege.Count == 0) return;
+        try { await Task.WhenAll(auftraege); Log.Schreiben("Handy: Vorwarnung Zeitplan gesendet."); }
+        catch (Exception ex) { Log.Schreiben("Handy: Vorwarnung nicht gesendet: " + ex.Message); }
+    }
+
+    // kurze stille Bestätigung ohne Knöpfe
+    public static async Task HinweisOhneKnopfAsync(HandyEinstellungen h, string titel, string text)
+    {
+        if (string.IsNullOrWhiteSpace(h.NtfyThema)) return;
+        using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(6) };
+        try { await http.PostAsJsonAsync(h.NtfyServer.TrimEnd('/') + "/", new { topic = h.NtfyThema, title = titel, message = text, priority = 2, tags = new[] { "white_check_mark" } }); }
+        catch (Exception ex) { Log.Schreiben("Handy: Bestätigung nicht gesendet: " + ex.Message); }
+    }
+
     public static void Senden(HandyEinstellungen h, string titel, string text, bool test = false)
         => _ = SendenAsync(h, titel, text, test);
 
